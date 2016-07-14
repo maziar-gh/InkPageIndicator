@@ -249,7 +249,8 @@ public class InkPageIndicator extends View
 
   private void setCurrentPageImmediate() {
     if (viewPager != null) {
-      currentPage = viewPager.getCurrentItem();
+      int realPosition = viewPager.getCurrentItem() % pageCount;
+      currentPage = realPosition;
     } else {
       currentPage = 0;
     }
@@ -533,15 +534,18 @@ public class InkPageIndicator extends View
   }
 
   private void setSelectedPage(int now) {
-    if (now == currentPage) return;
+
+    int realPositionNow = now % pageCount;
+
+    if (realPositionNow == currentPage) return;
 
     pageChanging = true;
     previousPage = currentPage;
-    currentPage = now;
-    final int steps = Math.abs(now - previousPage);
+    currentPage = realPositionNow;
+    final int steps = Math.abs(realPositionNow - previousPage);
 
     if (steps > 1) {
-      if (now > previousPage) {
+      if (realPositionNow > previousPage) {
         for (int i = 0; i < steps; i++) {
           setJoiningFraction(previousPage + i, 1f);
         }
@@ -556,7 +560,9 @@ public class InkPageIndicator extends View
     // retreat animations when it has moved 75% of the way.
     // The retreat animation in turn will kick of reveal anims when the
     // retreat has passed any dots to be revealed
-    moveAnimation = createMoveSelectedAnimator(dotCenterX[now], previousPage, now, steps);
+    moveAnimation =
+        createMoveSelectedAnimator(dotCenterX[realPositionNow], previousPage, realPositionNow,
+            steps);
     moveAnimation.start();
   }
 
@@ -614,7 +620,6 @@ public class InkPageIndicator extends View
 
       joiningFractions[leftDot] = fraction;
       ViewCompat.postInvalidateOnAnimation(this);
-      ;
     }
   }
 
